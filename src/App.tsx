@@ -1,8 +1,8 @@
-import { HomePage } from "@/pages";
+import { LandingPage } from "@/pages";
 import "@/styles/global.css";
 
 function App() {
-  return <HomePage />;
+  return <LandingPage />;
 }
 
 export default App;
