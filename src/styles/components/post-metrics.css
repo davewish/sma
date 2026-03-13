@@ -19,6 +19,8 @@
   margin-bottom: 20px;
   border-bottom: 1px solid #e0e6ed;
   padding-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .metrics-title {
@@ -26,15 +28,67 @@
   font-weight: 700;
   color: #2c3e50;
   margin: 0;
+  flex: 1;
+  min-width: 180px;
+}
+
+.metrics-time-filter {
+  display: flex;
+  gap: 8px;
+}
+
+.time-filter-btn {
+  padding: 8px 14px;
+  border: 1px solid #cbd5e0;
+  border-radius: 5px;
+  background: white;
+  color: #718096;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+}
+
+.time-filter-btn:hover {
+  border-color: #667eea;
+  color: #667eea;
+  background: #f8faff;
+}
+
+.time-filter-btn.active {
+  border-color: #667eea;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 2px 6px rgba(102, 126, 234, 0.25);
+}
+
+.metrics-period-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: #f8faff;
+  border: 1px solid #e0e6ed;
+  border-radius: 5px;
+  margin-bottom: 18px;
+}
+
+.period-label {
+  font-size: 12px;
+  color: #4a5568;
+  font-weight: 600;
 }
 
 .metrics-count {
   font-size: 12px;
   color: #718096;
-  background: #f7fafc;
+  background: white;
   padding: 4px 10px;
   border-radius: 12px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .metrics-summary {

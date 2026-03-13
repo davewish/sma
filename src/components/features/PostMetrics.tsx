@@ -3,6 +3,7 @@
  * Displays engagement metrics (likes, comments, shares) for posts
  */
 
+import { useState } from "react";
 import type { ScheduledPost } from "@/types/dashboard.types";
 import "@/styles/components/post-metrics.css";
 
@@ -10,14 +11,29 @@ interface PostMetricsProps {
   posts: ScheduledPost[];
 }
 
-export function PostMetrics({ posts }: PostMetricsProps): React.ReactElement {
-  const publishedPosts = posts.filter((post) => post.status === "published");
+type TimePeriod = 7 | 14 | 30;
 
-  if (publishedPosts.length === 0) {
+export function PostMetrics({ posts }: PostMetricsProps): React.ReactElement {
+  const [selectedPeriod, setSelectedPeriod] = useState<TimePeriod>(7);
+
+  const getPostsForPeriod = (days: TimePeriod): ScheduledPost[] => {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - days);
+
+    return posts.filter((post) => {
+      if (post.status !== "published") return false;
+      const postDate = new Date(post.scheduledTime);
+      return postDate >= cutoffDate;
+    });
+  };
+
+  const publishedPosts = getPostsForPeriod(selectedPeriod);
+
+  if (posts.filter((p) => p.status === "published").length === 0) {
     return (
       <div className="post-metrics">
         <div className="metrics-header">
-          <h2 className="metrics-title">Recent Post Metrics</h2>
+          <h2 className="metrics-title">Post Engagement Metrics</h2>
         </div>
         <div className="no-metrics-message">
           <p>No published posts yet</p>
@@ -51,7 +67,31 @@ export function PostMetrics({ posts }: PostMetricsProps): React.ReactElement {
   return (
     <div className="post-metrics">
       <div className="metrics-header">
-        <h2 className="metrics-title">Recent Post Metrics</h2>
+        <h2 className="metrics-title">Post Engagement Metrics</h2>
+        <div className="metrics-time-filter">
+          <button
+            className={`time-filter-btn ${selectedPeriod === 7 ? "active" : ""}`}
+            onClick={() => setSelectedPeriod(7)}
+          >
+            Last 7 Days
+          </button>
+          <button
+            className={`time-filter-btn ${selectedPeriod === 14 ? "active" : ""}`}
+            onClick={() => setSelectedPeriod(14)}
+          >
+            Last 14 Days
+          </button>
+          <button
+            className={`time-filter-btn ${selectedPeriod === 30 ? "active" : ""}`}
+            onClick={() => setSelectedPeriod(30)}
+          >
+            Last 30 Days
+          </button>
+        </div>
+      </div>
+
+      <div className="metrics-period-info">
+        <span className="period-label">Showing last {selectedPeriod} days</span>
         <span className="metrics-count">{publishedPosts.length} posts</span>
       </div>
 
