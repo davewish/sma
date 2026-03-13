@@ -11,10 +11,9 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 40px;
-  padding-bottom: 20px;
+  padding: 24px 28px;
   border-bottom: 2px solid rgba(255, 255, 255, 0.3);
   background: white;
-  padding: 20px;
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
@@ -26,14 +25,49 @@
 }
 
 .welcome {
-  margin: 5px 0 0 0;
+  margin: 8px 0 0 0;
   color: #666;
-  font-size: 0.9em;
+  font-size: 0.95em;
+  font-weight: 500;
 }
 
 .header-right {
   display: flex;
-  gap: 10px;
+  gap: 12px;
+  align-items: center;
+}
+
+/* Button Styles for Dashboard */
+.dashboard-header .button {
+  padding: 10px 20px;
+  font-size: 0.875rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  white-space: nowrap;
+}
+
+.dashboard-header .button.button--secondary {
+  background: transparent;
+  color: #667eea;
+  border: 2px solid #667eea;
+  padding: 8px 18px;
+}
+
+.dashboard-header .button.button--secondary:hover {
+  background: #667eea;
+  color: white;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  transform: translateY(-1px);
+}
+
+.dashboard-header .button.button--secondary:active {
+  transform: translateY(0);
 }
 
 .error-banner {

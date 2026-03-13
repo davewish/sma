@@ -166,26 +166,120 @@
   transition: all 0.3s ease;
 }
 
-.button.button--primary {
-  background: var(--color-primary);
-  color: var(--color-white);
+/* Base button styles */
+.button {
+  padding: 14px 32px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  white-space: nowrap;
+  text-decoration: none;
 }
 
-.button.button--primary:hover {
-  background: var(--color-primary-dark);
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Size variants */
+.button.button--sm {
+  padding: 10px 20px;
+  font-size: 0.875rem;
+  min-height: 38px;
+  border-radius: 6px;
+}
+
+.button.button--md {
+  padding: 12px 28px;
+  font-size: 0.95rem;
+  min-height: 42px;
+  border-radius: 8px;
+}
+
+.button.button--lg {
+  padding: 16px 40px;
+  font-size: 1.05rem;
+  min-height: 48px;
+  border-radius: 8px;
+  font-weight: 700;
+}
+
+/* Color variants */
+.button.button--primary {
+  background: linear-gradient(135deg, #667eea 0%, #5568d3 100%);
+  color: var(--color-white);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  border: none;
+}
+
+.button.button--primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #5568d3 0%, #4857bc 100%);
   transform: translateY(-2px);
-  box-shadow: var(--box-shadow-lg);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.button.button--primary:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 }
 
 .button.button--secondary {
-  background: var(--color-gray-100);
+  background: transparent;
   color: var(--color-primary);
   border: 2px solid var(--color-primary);
+  padding-left: calc(28px - 2px);
+  padding-right: calc(28px - 2px);
 }
 
-.button.button--secondary:hover {
+.button.button--secondary.button--sm {
+  padding-left: calc(20px - 2px);
+  padding-right: calc(20px - 2px);
+}
+
+.button.button--secondary.button--md {
+  padding-left: calc(28px - 2px);
+  padding-right: calc(28px - 2px);
+}
+
+.button.button--secondary.button--lg {
+  padding-left: calc(40px - 2px);
+  padding-right: calc(40px - 2px);
+}
+
+.button.button--secondary:hover:not(:disabled) {
   background: var(--color-primary);
   color: var(--color-white);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  transform: translateY(-2px);
+}
+
+.button.button--secondary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.button.button--danger {
+  background: #ff6b6b;
+  color: var(--color-white);
+  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+  border: none;
+}
+
+.button.button--danger:hover:not(:disabled) {
+  background: #ff5252;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+}
+
+.button.button--danger:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(255, 107, 107, 0.3);
 }
 
 .hero-footnote {
