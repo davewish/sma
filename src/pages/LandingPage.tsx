@@ -3,10 +3,36 @@
  * Hero section, features, benefits, pricing, and CTA
  */
 
+import { useState } from "react";
 import { Button } from "@/components/common";
 import "@/styles/landing.css";
 
-export const LandingPage: React.FC = () => {
+interface LandingPageProps {
+  onNavigateToLogin?: () => void;
+}
+
+export const LandingPage: React.FC<LandingPageProps> = ({
+  onNavigateToLogin,
+}) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  const closeMenu = () => {
+    setIsMenuOpen(false);
+  };
+
+  const handleGetStarted = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    closeMenu();
+    if (onNavigateToLogin) {
+      onNavigateToLogin();
+    }
+  };
+
   return (
     <div className="landing-page">
       {/* Navigation */}
@@ -16,12 +42,31 @@ export const LandingPage: React.FC = () => {
             <span className="logo-icon">📱</span>
             <span className="logo-text">SocialSync</span>
           </div>
-          <div className="nav-links">
-            <a href="#features">Features</a>
-            <a href="#how-it-works">How It Works</a>
-            <a href="#pricing">Pricing</a>
-            <Button variant="primary" size="sm">
-              Get Started
+
+          {/* Hamburger Menu Button */}
+          <button
+            className={`hamburger ${isMenuOpen ? "active" : ""}`}
+            onClick={toggleMenu}
+            aria-label="Toggle navigation menu"
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+
+          {/* Navigation Links */}
+          <div className={`nav-links ${isMenuOpen ? "mobile-open" : ""}`}>
+            <a href="#features" onClick={closeMenu}>
+              Features
+            </a>
+            <a href="#how-it-works" onClick={closeMenu}>
+              How It Works
+            </a>
+            <a href="#pricing" onClick={closeMenu}>
+              Pricing
+            </a>
+            <Button variant="primary" size="sm" onClick={handleGetStarted}>
+              Login
             </Button>
           </div>
         </div>
@@ -38,7 +83,7 @@ export const LandingPage: React.FC = () => {
             Instagram, Facebook, and TikTok
           </p>
           <div className="hero-buttons">
-            <Button variant="primary" size="lg">
+            <Button variant="primary" size="lg" onClick={handleGetStarted}>
               Start Free Trial
             </Button>
             <Button variant="secondary" size="lg">
