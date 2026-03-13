@@ -1,14 +1,124 @@
-.schedule-selector-container {
-  padding: 24px;
-  background: linear-gradient(135deg, #f5f7fa 0%, #f0f3f7 100%);
-  border-radius: 12px;
+.schedule-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.schedule-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.schedule-section > label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: #2c3e50;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.schedule-type-buttons {
+  display: flex;
+  gap: 14px;
+  width: fit-content;
+}
+
+.schedule-type-btn {
+  padding: 14px 24px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #4a5568;
+  background: white;
+  border: 2px solid #cbd5e0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.schedule-type-btn:hover {
+  border-color: #667eea;
+  background: #f8faff;
+  color: #2d3748;
+}
+
+.schedule-type-btn.active {
+  border: 2px solid transparent;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+}
+
+.schedule-type-btn.active:hover {
+  box-shadow: 0 6px 14px rgba(102, 126, 234, 0.4);
+  transform: translateY(-1px);
+}
+
+.schedule-input-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  background: #f8faff;
   border: 1px solid #e0e6ed;
+  border-radius: 6px;
+}
+
+.schedule-input-container > label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #2c3e50;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.schedule-input {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid #cbd5e0;
+  border-radius: 5px;
+  font-size: 13px;
+  color: #2d3748;
+  background: white;
+  transition: all 0.2s ease;
+}
+
+.schedule-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+}
+
+.scheduled-preview {
+  font-size: 12px;
+  color: #48bb78;
+  font-weight: 600;
+  margin: 0;
+  padding: 8px 10px;
+  background: #f0fdf4;
+  border-radius: 4px;
+  border-left: 3px solid #48bb78;
+}
+
+.schedule-selector-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
 
 .schedule-type-selector {
   display: flex;
   gap: 12px;
-  margin-bottom: 24px;
+  margin-bottom: 18px;
 }
 
 .schedule-option {
@@ -22,50 +132,57 @@
 
 .schedule-label {
   display: block;
-  padding: 14px 16px;
+  padding: 13px 16px;
   border: 2px solid #cbd5e0;
-  border-radius: 8px;
+  border-radius: 6px;
   text-align: center;
   cursor: pointer;
-  font-weight: 600;
-  font-size: 14px;
+  font-weight: 700;
+  font-size: 13px;
   color: #4a5568;
   background: white;
   transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
 }
 
 .schedule-radio:checked + .schedule-label {
   border-color: #667eea;
-  background: #edf2f7;
-  color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 2px 6px rgba(102, 126, 234, 0.25);
 }
 
 .schedule-radio:not(:checked) + .schedule-label:hover {
-  border-color: #cbd5e0;
-  background: #f7fafc;
+  border-color: #667eea;
+  background: #f8faff;
+  color: #2d3748;
 }
 
 .schedule-content {
-  margin-bottom: 24px;
+  margin-bottom: 18px;
+  padding: 14px;
+  background: #f8faff;
+  border: 1px solid #e0e6ed;
+  border-radius: 6px;
 }
 
 .content-label {
   display: block;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 700;
   color: #2c3e50;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.3px;
 }
 
 .datetime-input {
   width: 100%;
-  padding: 12px 16px;
+  padding: 11px 14px;
   border: 1px solid #cbd5e0;
-  border-radius: 6px;
-  font-size: 14px;
+  border-radius: 5px;
+  font-size: 13px;
   color: #2d3748;
   background: white;
   transition: all 0.2s ease;
@@ -74,7 +191,7 @@
 .datetime-input:focus {
   outline: none;
   border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
 }
 
 .datetime-input:disabled {
@@ -116,55 +233,67 @@
   font-size: 14px;
 }
 
-.accounts-section {
-  margin-top: 24px;
+.accounts-section > label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: #2c3e50;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 8px;
 }
 
-.accounts-grid {
+.accounts-hint {
+  font-size: 12px;
+  color: #718096;
+  margin: 0 0 14px 0;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+.accounts-list {
   display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 12px;
 }
 
-.account-item {
+.account-checkbox-label {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px;
+  gap: 11px;
+  padding: 14px;
   background: white;
-  border: 1px solid #e0e6ed;
+  border: 2px solid #cbd5e0;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.account-item:hover {
-  border-color: #cbd5e0;
-  background: #f7fafc;
+.account-checkbox-label:hover {
+  border-color: #667eea;
+  background: #f8faff;
+  box-shadow: 0 2px 6px rgba(102, 126, 234, 0.1);
 }
 
-.account-checkbox {
-  width: 18px;
-  height: 18px;
+.account-checkbox-label .account-checkbox {
+  width: 20px;
+  height: 20px;
   cursor: pointer;
   accent-color: #667eea;
+  flex-shrink: 0;
+  margin: 0;
 }
 
-.account-info {
+.account-checkbox-label .account-info {
   flex: 1;
   display: flex;
-  align-items: center;
-  gap: 10px;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
 }
 
-.platform-icon {
+.account-icon {
   font-size: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  background: #edf2f7;
-  border-radius: 6px;
 }
 
 .account-details {
@@ -175,49 +304,64 @@
 
 .account-name {
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   color: #2d3748;
 }
 
-.account-platform {
+.account-username {
   font-size: 11px;
   color: #718096;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
+  text-transform: lowercase;
+  font-weight: 500;
 }
 
 .account-followers {
-  font-size: 12px;
+  font-size: 11px;
   color: #667eea;
-  font-weight: 500;
+  font-weight: 700;
+  padding-left: 8px;
+  border-left: 3px solid;
 }
 
-.selection-warning {
-  margin-top: 12px;
-  padding: 10px 12px;
+.account-checkbox-label input:checked + .account-info,
+.account-checkbox-label input:checked ~ .account-followers {
+  color: #667eea;
+}
+
+.account-checkbox-label input:checked {
+  accent-color: #667eea;
+}
+
+.no-accounts-message {
+  padding: 20px;
+  text-align: center;
+  background: #f7fafc;
+  border: 2px dashed #cbd5e0;
+  border-radius: 6px;
+}
+
+.no-accounts-message p {
+  font-size: 13px;
+  color: #4a5568;
+  margin: 0 0 8px 0;
+  font-weight: 600;
+}
+
+.no-accounts-message .small-text {
+  font-size: 12px;
+  color: #a0aec0;
+  font-weight: 400;
+}
+
+.warning-text {
+  font-size: 12px;
+  color: #c05621;
   background: #feebc8;
   border: 1px solid #fbd38d;
+  padding: 10px 12px;
   border-radius: 4px;
-  color: #c05621;
-  font-size: 12px;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.warning-icon {
-  font-size: 14px;
-}
-
-.account-item.checked {
-  border-color: #667eea;
-  background: #f0f4ff;
-}
-
-.account-item.checked .platform-icon {
-  background: #667eea;
-  color: white;
+  margin-top: 12px;
+  font-weight: 600;
 }
 
 @media (max-width: 768px) {
