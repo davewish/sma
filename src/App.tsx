@@ -1,23 +1,36 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AuthProvider } from "@/context";
 import { useAuth } from "@/hooks";
-import { LandingPage, LoginPage, DashboardPage } from "@/pages";
+import { LandingPage, LoginPage, DashboardPage, CreatePostPage } from "@/pages";
+import { UnifiedLayout } from "@/components/layout";
 import "@/styles/global.css";
 
 type Page = "landing" | "login" | "dashboard";
+type DashboardSection = "dashboard" | "create-post";
 
 function AppContent() {
   const [currentPage, setCurrentPage] = useState<Page>("landing");
-  const { user } = useAuth();
+  const [currentSection, setCurrentSection] =
+    useState<DashboardSection>("dashboard");
+  const { user, logout } = useAuth();
 
-  // If user is authenticated, show dashboard
+  // If user is authenticated, show unified dashboard interface
   if (user) {
     return (
-      <DashboardPage
-        onNavigateToLanding={() => {
+      <UnifiedLayout
+        currentSection={currentSection}
+        onNavigateToSection={setCurrentSection}
+        onLogout={() => {
+          logout();
           setCurrentPage("landing");
         }}
-      />
+      >
+        {currentSection === "dashboard" ? (
+          <DashboardPage />
+        ) : (
+          <CreatePostPage />
+        )}
+      </UnifiedLayout>
     );
   }
 

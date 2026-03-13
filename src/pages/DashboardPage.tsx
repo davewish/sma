@@ -1,26 +1,18 @@
-/**
- * Dashboard Page
- */
-
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks";
 import { ConnectedAccountsComponent } from "@/components/features/ConnectedAccounts";
 import { Calendar } from "@/components/features/Calendar";
-import { Button } from "@/components/common";
 import { dashboardService } from "@/services/api/dashboard.service";
 import type {
   ConnectedAccount,
   ScheduledPost,
   DashboardStats,
 } from "@/types/dashboard.types";
+import type { OAuthProvider } from "@/types/oauth.types";
 import "@/styles/dashboard.css";
 
-interface DashboardPageProps {
-  onNavigateToLanding?: () => void;
-}
-
-export function DashboardPage({ onNavigateToLanding }: DashboardPageProps) {
-  const { user, logout } = useAuth();
+export function DashboardPage(): React.ReactElement {
+  const { user } = useAuth();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [accounts, setAccounts] = useState<ConnectedAccount[]>([]);
   const [posts, setPosts] = useState<ScheduledPost[]>([]);
@@ -54,10 +46,15 @@ export function DashboardPage({ onNavigateToLanding }: DashboardPageProps) {
     }
   };
 
-  const handleConnect = async (platform: string) => {
-    // TODO: Implement OAuth flow for platform
-    console.log(`Connecting ${platform}...`);
-    alert(`${platform} OAuth flow would be initiated here`);
+  const handleConnect = async (platform: OAuthProvider) => {
+    try {
+      // In production, the OAuth callback would add the account
+      // For now, we just show a message
+      console.log(`OAuth flow initiated for ${platform}`);
+      // The actual account addition would happen after OAuth callback
+    } catch (error) {
+      console.error(`Failed to connect ${platform}:`, error);
+    }
   };
 
   const handleDisconnect = async (accountId: string) => {
@@ -71,11 +68,6 @@ export function DashboardPage({ onNavigateToLanding }: DashboardPageProps) {
     }
   };
 
-  const handleLogout = () => {
-    logout();
-    onNavigateToLanding?.();
-  };
-
   if (isLoading) {
     return (
       <div className="dashboard-loading">
@@ -86,18 +78,11 @@ export function DashboardPage({ onNavigateToLanding }: DashboardPageProps) {
 
   return (
     <div className="dashboard">
-      {/* Header */}
-      <header className="dashboard-header">
-        <div className="header-left">
-          <h1>Dashboard</h1>
-          <p className="welcome">Welcome back, {user?.name}!</p>
-        </div>
-        <div className="header-right">
-          <Button variant="secondary" size="sm" onClick={handleLogout}>
-            Logout
-          </Button>
-        </div>
-      </header>
+      {/* Header - Simplified */}
+      <div className="dashboard-header-simple">
+        <h1>Dashboard</h1>
+        <p className="welcome">Welcome back, {user?.name}!</p>
+      </div>
 
       {error && <div className="error-banner">{error}</div>}
 

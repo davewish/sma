@@ -2,12 +2,15 @@
  * Connected Accounts Component
  */
 
+import { useState } from "react";
 import type { ConnectedAccount } from "@/types/dashboard.types";
+import type { OAuthProvider } from "@/types/oauth.types";
+import { useOAuth } from "@/hooks";
 import "@/styles/components/connected-accounts.css";
 
 interface ConnectedAccountsProps {
   accounts: ConnectedAccount[];
-  onConnect: (platform: string) => void;
+  onConnect: (platform: OAuthProvider) => Promise<void>;
   onDisconnect: (accountId: string) => void;
 }
 
@@ -28,15 +31,32 @@ export function ConnectedAccountsComponent({
   onConnect,
   onDisconnect,
 }: ConnectedAccountsProps) {
-  const allPlatforms: Array<"instagram" | "facebook" | "tiktok"> = [
+  const { initiateConnection, isLoading } = useOAuth();
+  const [loadingPlatform, setLoadingPlatform] = useState<string | null>(null);
+
+  const allPlatforms: Array<OAuthProvider> = [
     "instagram",
     "facebook",
     "tiktok",
   ];
-  const connectedPlatforms = accounts.map((acc) => acc.platform);
+  const connectedPlatforms = accounts.map(
+    (acc) => acc.platform as OAuthProvider,
+  );
   const availablePlatforms = allPlatforms.filter(
     (p) => !connectedPlatforms.includes(p),
   );
+
+  const handleConnectClick = async (platform: OAuthProvider) => {
+    setLoadingPlatform(platform);
+    try {
+      initiateConnection(platform);
+      await onConnect(platform);
+    } catch (error) {
+      console.error(`Failed to connect ${platform}:`, error);
+    } finally {
+      setLoadingPlatform(null);
+    }
+  };
 
   return (
     <div className="connected-accounts">
@@ -70,6 +90,7 @@ export function ConnectedAccountsComponent({
               <button
                 className="disconnect-btn"
                 onClick={() => onDisconnect(account.id)}
+                disabled={isLoading}
               >
                 Disconnect
               </button>
@@ -90,12 +111,15 @@ export function ConnectedAccountsComponent({
                   borderColor: platformColors[platform],
                   color: platformColors[platform],
                 }}
-                onClick={() => onConnect(platform)}
+                onClick={() => handleConnectClick(platform)}
+                disabled={isLoading}
               >
                 <span className="icon">
                   {platformEmojis[platform as keyof typeof platformEmojis]}
                 </span>
-                Connect {platform.charAt(0).toUpperCase() + platform.slice(1)}
+                {loadingPlatform === platform
+                  ? "Connecting..."
+                  : `Connect ${platform.charAt(0).toUpperCase() + platform.slice(1)}`}
               </button>
             ))}
           </div>
