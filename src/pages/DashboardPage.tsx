@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks";
 import { ConnectedAccountsComponent } from "@/components/features/ConnectedAccounts";
 import { Calendar } from "@/components/features/Calendar";
+import { PostMetrics } from "@/components/features/PostMetrics";
 import { dashboardService } from "@/services/api/dashboard.service";
 import type {
   ConnectedAccount,
@@ -123,6 +124,8 @@ export function DashboardPage(): React.ReactElement {
 
         {/* Main Area */}
         <main className="dashboard-main">
+          <PostMetrics posts={posts} />
+
           <Calendar
             posts={posts}
             onPostClick={setSelectedPost}
