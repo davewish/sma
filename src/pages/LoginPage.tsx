@@ -12,13 +12,15 @@ interface LoginPageProps {
 }
 
 export function LoginPage({ onNavigateToLanding }: LoginPageProps) {
-  const { login, isLoading, error, clearError } = useAuth();
+  const { login, signup, isLoading, error, clearError } = useAuth();
   const [isSignUp, setIsSignUp] = useState(false);
   const [formData, setFormData] = useState({
     email: "admin@demo.com",
     password: "admin",
+    passwordConfirm: "",
     name: "",
   });
+  const [passwordError, setPasswordError] = useState<string | null>(null);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -26,17 +28,43 @@ export function LoginPage({ onNavigateToLanding }: LoginPageProps) {
       ...prev,
       [name]: value,
     }));
+    // Clear password error when user types
+    if (name === "password" || name === "passwordConfirm") {
+      setPasswordError(null);
+    }
+  };
+
+  const validatePasswords = (): boolean => {
+    if (isSignUp) {
+      if (formData.password !== formData.passwordConfirm) {
+        setPasswordError("Passwords do not match");
+        return false;
+      }
+      if (formData.password.length < 6) {
+        setPasswordError("Password must be at least 6 characters");
+        return false;
+      }
+    }
+    setPasswordError(null);
+    return true;
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     clearError();
 
+    if (!validatePasswords()) {
+      return;
+    }
+
     try {
       if (isSignUp) {
-        // TODO: Implement signup when available
-        console.log("Sign up not yet implemented");
-        // await signup({ ...formData });
+        await signup({
+          email: formData.email,
+          password: formData.password,
+          passwordConfirm: formData.passwordConfirm,
+          name: formData.name,
+        });
       } else {
         await login({
           email: formData.email,
@@ -73,6 +101,7 @@ export function LoginPage({ onNavigateToLanding }: LoginPageProps) {
         )}
 
         {error && <div className="error-message">{error}</div>}
+        {passwordError && <div className="error-message">{passwordError}</div>}
 
         <form onSubmit={handleSubmit} className="login-form">
           {isSignUp && (
@@ -115,6 +144,21 @@ export function LoginPage({ onNavigateToLanding }: LoginPageProps) {
               required
             />
           </div>
+
+          {isSignUp && (
+            <div className="form-group">
+              <label htmlFor="passwordConfirm">Confirm Password</label>
+              <input
+                id="passwordConfirm"
+                type="password"
+                name="passwordConfirm"
+                value={formData.passwordConfirm}
+                onChange={handleInputChange}
+                placeholder="Confirm password"
+                required
+              />
+            </div>
+          )}
 
           <Button type="submit" disabled={isLoading} className="login-button">
             {isLoading ? "Processing..." : isSignUp ? "Sign Up" : "Login"}

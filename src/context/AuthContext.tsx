@@ -10,6 +10,7 @@ import type {
   SignUpCredentials,
 } from "@/types/auth.types";
 import { authService } from "@/services/api/auth.service";
+import { authManager } from "@/services/api/auth-manager";
 
 const STORAGE_KEYS = {
   TOKEN: "auth_token",
@@ -56,6 +57,71 @@ export function AuthProvider({ children }: AuthProviderProps) {
     };
 
     initializeAuth();
+
+    // Listen for token expiration via localStorage changes
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === STORAGE_KEYS.TOKEN && !e.newValue) {
+        // Token was removed
+        console.log("Token removed, logging out");
+        setState({
+          user: null,
+          token: null,
+          isAuthenticated: false,
+          isLoading: false,
+          error: "Session expired. Please log in again.",
+        });
+      }
+
+      // Also check for the __token_expired__ flag
+      if (e.key === "__token_expired__") {
+        console.log("Token expiration flag detected");
+        setState({
+          user: null,
+          token: null,
+          isAuthenticated: false,
+          isLoading: false,
+          error: "Session expired. Please log in again.",
+        });
+      }
+    };
+
+    // Listen for token expiration events from API interceptor
+    const handleTokenExpired = () => {
+      console.log("Token expired event received");
+      setState({
+        user: null,
+        token: null,
+        isAuthenticated: false,
+        isLoading: false,
+        error: "Session expired. Please log in again.",
+      });
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("auth-token-expired", handleTokenExpired);
+
+    // Register logout callback with AuthManager
+    const handleAuthManagerLogout = () => {
+      console.log("AuthManager logout callback triggered");
+      localStorage.removeItem(STORAGE_KEYS.TOKEN);
+      localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+      localStorage.removeItem(STORAGE_KEYS.USER);
+      setState({
+        user: null,
+        token: null,
+        isAuthenticated: false,
+        isLoading: false,
+        error: "Session expired. Please log in again.",
+      });
+    };
+
+    authManager.onLogoutRequired(handleAuthManagerLogout);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener("auth-token-expired", handleTokenExpired);
+      authManager.removeLogoutCallback(handleAuthManagerLogout);
+    };
   }, []);
 
   const clearError = useCallback(() => {
@@ -132,20 +198,27 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, []);
 
-  const logout = useCallback(() => {
-    localStorage.removeItem(STORAGE_KEYS.TOKEN);
-    localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
-    localStorage.removeItem(STORAGE_KEYS.USER);
-    setState({
-      user: null,
-      token: null,
-      isAuthenticated: false,
-      isLoading: false,
-      error: null,
-    });
-    authService.logout().catch(() => {
-      // Handle logout error silently
-    });
+  const logout = useCallback(async () => {
+    setState((prev) => ({ ...prev, isLoading: true, error: null }));
+    try {
+      // Call logout API before clearing localStorage (so token is still available)
+      await authService.logout();
+    } catch (error) {
+      console.error("Logout API error:", error);
+      // Continue with local cleanup even if API request fails
+    } finally {
+      // Clear local storage and state
+      localStorage.removeItem(STORAGE_KEYS.TOKEN);
+      localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
+      localStorage.removeItem(STORAGE_KEYS.USER);
+      setState({
+        user: null,
+        token: null,
+        isAuthenticated: false,
+        isLoading: false,
+        error: null,
+      });
+    }
   }, []);
 
   const loginWithOAuth = useCallback(

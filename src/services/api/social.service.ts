@@ -1,0 +1,130 @@
+/**
+ * Social Connection Service - API calls for social media account connections
+ */
+
+import { apiClient } from "./client";
+
+export interface SocialAccount {
+  _id?: string;
+  userId?: string;
+  platform: "facebook" | "instagram" | "tiktok" | "twitter";
+  accountId?: string;
+  accountName: string;
+  accessToken?: string;
+  refreshToken?: string;
+  expiresAt: string;
+  connectedAt: string;
+  followers?: number;
+  lastSyncedAt?: string;
+  profilePicture?: string;
+  verified?: boolean;
+  profileData?: {
+    profilePicture?: string;
+    followers?: number;
+    verified?: boolean;
+  };
+}
+
+interface SocialAccountsResponse {
+  accounts: SocialAccount[];
+}
+
+export const socialService = {
+  /**
+   * Get all connected social accounts for the user
+   */
+  async getConnectedAccounts(): Promise<SocialAccount[]> {
+    const response = await apiClient.get<
+      SocialAccountsResponse | SocialAccount[]
+    >("/social/accounts");
+    if (!response?.data) {
+      throw new Error("Invalid response from server");
+    }
+
+    // Handle both response formats: wrapped in accounts property or direct array
+    let accounts: SocialAccount[];
+    if (Array.isArray(response.data)) {
+      accounts = response.data;
+    } else if ((response.data as SocialAccountsResponse).accounts) {
+      accounts = (response.data as SocialAccountsResponse).accounts;
+    } else {
+      throw new Error("Invalid response structure");
+    }
+
+    return accounts;
+  },
+
+  /**
+   * Connect a new social media account via OAuth
+   */
+  async connectAccount(
+    platform: string,
+    authCode: string,
+  ): Promise<SocialAccount> {
+    const response = await apiClient.post<SocialAccount>(
+      `/social/accounts/connect`,
+      { platform, code: authCode },
+    );
+    if (!response?.data) {
+      throw new Error("Invalid response from server");
+    }
+    return response.data;
+  },
+
+  /**
+   * Disconnect a social media account
+   */
+  async disconnectAccount(accountId: string): Promise<void> {
+    await apiClient.delete(`/social/accounts/${accountId}`);
+  },
+
+  /**
+   * Refresh access token for a social account
+   */
+  async refreshAccountToken(accountId: string): Promise<SocialAccount> {
+    const response = await apiClient.post<SocialAccount>(
+      `/social/accounts/${accountId}/refresh`,
+    );
+    if (!response?.data) {
+      throw new Error("Invalid response from server");
+    }
+    return response.data;
+  },
+
+  /**
+   * Get details for a specific social account
+   */
+  async getAccountDetails(accountId: string): Promise<SocialAccount> {
+    const response = await apiClient.get<SocialAccount>(
+      `/social/accounts/${accountId}`,
+    );
+    if (!response?.data) {
+      throw new Error("Invalid response from server");
+    }
+    return response.data;
+  },
+
+  /**
+   * Initiate OAuth connection flow
+   */
+  initiateOAuthFlow(platform: string): void {
+    const clientId = import.meta.env[
+      `VITE_${platform.toUpperCase()}_CLIENT_ID`
+    ];
+    const redirectUri = `${window.location.origin}/api/social/callback/${platform}`;
+
+    const authUrls: Record<string, string> = {
+      facebook: `https://www.facebook.com/v18.0/dialog/oauth?client_id=${clientId}&redirect_uri=${redirectUri}&scope=pages_manage_metadata,pages_read_engagement,instagram_basic,instagram_manage_insights`,
+      instagram: `https://api.instagram.com/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=user_profile,user_media`,
+      twitter: `https://twitter.com/i/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=tweet.read,follows.read,follows.write`,
+      tiktok: `https://www.tiktok.com/v1/oauth/authorize?client_key=${clientId}&redirect_uri=${redirectUri}&scope=user.info.basic,video.list`,
+    };
+
+    const authUrl = authUrls[platform];
+    if (!authUrl) {
+      throw new Error(`Unsupported platform: ${platform}`);
+    }
+
+    window.location.href = authUrl;
+  },
+};

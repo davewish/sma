@@ -1,12 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { AuthProvider } from "@/context";
 import { useAuth } from "@/hooks";
-import { LandingPage, LoginPage, DashboardPage, CreatePostPage } from "@/pages";
+import { LandingPage, LoginPage, DashboardPage, CreatePostPage, ConnectedAccountsPage } from "@/pages";
 import { UnifiedLayout } from "@/components/layout";
 import "@/styles/global.css";
 
 type Page = "landing" | "login" | "dashboard";
-type DashboardSection = "dashboard" | "create-post";
+type DashboardSection = "dashboard" | "create-post" | "connected-accounts";
 
 function AppContent() {
   const [currentPage, setCurrentPage] = useState<Page>("landing");
@@ -27,8 +27,10 @@ function AppContent() {
       >
         {currentSection === "dashboard" ? (
           <DashboardPage />
-        ) : (
+        ) : currentSection === "create-post" ? (
           <CreatePostPage />
+        ) : (
+          <ConnectedAccountsPage />
         )}
       </UnifiedLayout>
     );

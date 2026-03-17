@@ -199,6 +199,38 @@
   }
 }
 
+/* Dashboard Main Area - Medium Width & Centered */
+.dashboard-content {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.dashboard-main-full {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+/* Post Metrics - Full Width */
+.dashboard-main-full .post-metrics {
+  width: 100%;
+}
+
+/* Calendar - Full Width */
+.dashboard-main-full .calendar {
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .dashboard-content {
+    max-width: 90%;
+  }
+}
+
 @media (max-width: 480px) {
   .stats-section {
     grid-template-columns: 1fr;
@@ -210,5 +242,13 @@
 
   .header-right {
     width: 100%;
+  }
+
+  .dashboard-main-full {
+    gap: 20px;
+  }
+
+  .dashboard-content {
+    max-width: 95%;
   }
 }

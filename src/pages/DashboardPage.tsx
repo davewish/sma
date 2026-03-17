@@ -1,71 +1,88 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks";
-import { ConnectedAccountsComponent } from "@/components/features/ConnectedAccounts";
 import { Calendar } from "@/components/features/Calendar";
 import { PostMetrics } from "@/components/features/PostMetrics";
 import { dashboardService } from "@/services/api/dashboard.service";
+import { socialService } from "@/services/api/social.service";
 import type {
   ConnectedAccount,
   ScheduledPost,
   DashboardStats,
 } from "@/types/dashboard.types";
-import type { OAuthProvider } from "@/types/oauth.types";
 import "@/styles/dashboard.css";
 
 export function DashboardPage(): React.ReactElement {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [accounts, setAccounts] = useState<ConnectedAccount[]>([]);
   const [posts, setPosts] = useState<ScheduledPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedPost, setSelectedPost] = useState<ScheduledPost | null>(null);
+
+  // Helper to check if error is token expiration
+  const isTokenExpired = (err: unknown): boolean => {
+    const message = err instanceof Error ? err.message : String(err);
+    return (
+      message.includes("TOKEN_EXPIRED") ||
+      message.includes("Invalid") ||
+      message.includes("expired") ||
+      message.includes("Session expired")
+    );
+  };
 
   useEffect(() => {
     loadDashboardData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadDashboardData = async () => {
     setIsLoading(true);
     setError(null);
     try {
+      console.log("Loading dashboard data...");
       const [statsData, accountsData, postsData] = await Promise.all([
         dashboardService.getDashboardStats(),
-        dashboardService.getConnectedAccounts(),
+        socialService.getConnectedAccounts(),
         dashboardService.getUpcomingPosts(),
       ]);
 
+      console.log("Stats data:", statsData);
+      console.log("Accounts data:", accountsData);
+      console.log("Posts data:", postsData);
+
       setStats(statsData);
-      setAccounts(accountsData);
+      // Convert social accounts to ConnectedAccount format (filter out twitter)
+      const connectedAccounts: ConnectedAccount[] = accountsData
+        .filter((acc) => acc.platform !== "twitter")
+        .map((acc) => ({
+          id: acc._id || acc.accountId || `${acc.platform}-${Date.now()}`,
+          platform: acc.platform as "instagram" | "facebook" | "tiktok",
+          username: acc.accountName,
+          // Use followers directly if available, otherwise check profileData
+          followers: acc.followers || acc.profileData?.followers || 0,
+          isConnected: true,
+          connectedAt: acc.connectedAt,
+        }));
+      setAccounts(connectedAccounts);
+      // postsData is now guaranteed to be an array from the service
       setPosts(postsData);
+      console.log("Posts set to state:", postsData.length, "posts");
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to load dashboard data",
-      );
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to load dashboard data";
+
+      console.error("Dashboard load error:", err);
+
+      // Check if it's a token expiration error using the helper
+      if (isTokenExpired(err)) {
+        console.log("Token expired detected in loadDashboardData, logging out");
+        await logout();
+        return;
+      }
+
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleConnect = async (platform: OAuthProvider) => {
-    try {
-      // In production, the OAuth callback would add the account
-      // For now, we just show a message
-      console.log(`OAuth flow initiated for ${platform}`);
-      // The actual account addition would happen after OAuth callback
-    } catch (error) {
-      console.error(`Failed to connect ${platform}:`, error);
-    }
-  };
-
-  const handleDisconnect = async (accountId: string) => {
-    try {
-      await dashboardService.disconnectAccount(accountId);
-      setAccounts(accounts.filter((acc) => acc.id !== accountId));
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to disconnect account",
-      );
     }
   };
 
@@ -113,56 +130,19 @@ export function DashboardPage(): React.ReactElement {
 
       {/* Main Content */}
       <div className="dashboard-content">
-        {/* Sidebar */}
-        <aside className="dashboard-sidebar">
-          <ConnectedAccountsComponent
-            accounts={accounts}
-            onConnect={handleConnect}
-            onDisconnect={handleDisconnect}
-          />
-        </aside>
-
-        {/* Main Area */}
-        <main className="dashboard-main">
+        {/* Main Area - Full Width */}
+        <main className="dashboard-main-full">
           <PostMetrics posts={posts} />
 
           <Calendar
             posts={posts}
-            onPostClick={setSelectedPost}
+            onPostClick={() => {
+              // Handle post click if needed
+            }}
             onDateSelect={(date) => {
               console.log("Selected date:", date);
             }}
           />
-
-          {selectedPost && (
-            <div className="selected-post">
-              <h3>Post Details</h3>
-              <div className="post-content">
-                <p>
-                  <strong>Platform:</strong>{" "}
-                  {selectedPost.platform.toUpperCase()}
-                </p>
-                <p>
-                  <strong>Scheduled:</strong>{" "}
-                  {new Date(selectedPost.scheduledTime).toLocaleString()}
-                </p>
-                <p>
-                  <strong>Content:</strong> {selectedPost.content}
-                </p>
-                {selectedPost.engagement && (
-                  <>
-                    <p>
-                      <strong>Likes:</strong> {selectedPost.engagement.likes}
-                    </p>
-                    <p>
-                      <strong>Comments:</strong>{" "}
-                      {selectedPost.engagement.comments}
-                    </p>
-                  </>
-                )}
-              </div>
-            </div>
-          )}
         </main>
       </div>
     </div>

@@ -9,9 +9,11 @@ export interface LoginCredentials {
 
 export interface SignUpCredentials extends LoginCredentials {
   name: string;
+  passwordConfirm?: string;
 }
 
 export interface AuthResponse {
+  message?: string;
   token: string;
   refreshToken?: string;
   user: AuthUser;

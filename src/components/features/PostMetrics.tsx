@@ -21,39 +21,39 @@ export function PostMetrics({ posts }: PostMetricsProps): React.ReactElement {
     cutoffDate.setDate(cutoffDate.getDate() - days);
 
     return posts.filter((post) => {
-      if (post.status !== "published") return false;
+      // Include all posts (published, scheduled, draft)
       const postDate = new Date(post.scheduledTime);
       return postDate >= cutoffDate;
     });
   };
 
-  const publishedPosts = getPostsForPeriod(selectedPeriod);
+  const postsToDisplay = getPostsForPeriod(selectedPeriod);
 
-  if (posts.filter((p) => p.status === "published").length === 0) {
+  if (posts.length === 0) {
     return (
       <div className="post-metrics">
         <div className="metrics-header">
-          <h2 className="metrics-title">Post Engagement Metrics</h2>
+          <h2 className="metrics-title">Post Metrics</h2>
         </div>
         <div className="no-metrics-message">
-          <p>No published posts yet</p>
+          <p>No posts yet</p>
           <p className="small-text">
-            Published posts will display engagement metrics here
+            Posts will display metrics here
           </p>
         </div>
       </div>
     );
   }
 
-  const totalLikes = publishedPosts.reduce(
+  const totalLikes = postsToDisplay.reduce(
     (sum, post) => sum + (post.engagement?.likes || 0),
     0,
   );
-  const totalComments = publishedPosts.reduce(
+  const totalComments = postsToDisplay.reduce(
     (sum, post) => sum + (post.engagement?.comments || 0),
     0,
   );
-  const totalShares = publishedPosts.reduce(
+  const totalShares = postsToDisplay.reduce(
     (sum, post) => sum + (post.engagement?.shares || 0),
     0,
   );
@@ -92,7 +92,7 @@ export function PostMetrics({ posts }: PostMetricsProps): React.ReactElement {
 
       <div className="metrics-period-info">
         <span className="period-label">Showing last {selectedPeriod} days</span>
-        <span className="metrics-count">{publishedPosts.length} posts</span>
+        <span className="metrics-count">{postsToDisplay.length} posts</span>
       </div>
 
       <div className="metrics-summary">
@@ -122,7 +122,7 @@ export function PostMetrics({ posts }: PostMetricsProps): React.ReactElement {
       <div className="posts-list">
         <h3 className="posts-list-title">Individual Post Performance</h3>
         <div className="posts-grid">
-          {publishedPosts.map((post) => (
+          {postsToDisplay.map((post: ScheduledPost) => (
             <div key={post.id} className="post-item">
               <div className="post-header">
                 <span className="platform-badge">

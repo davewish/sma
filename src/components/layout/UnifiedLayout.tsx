@@ -7,8 +7,8 @@ import "@/styles/unified-layout.css";
 
 interface UnifiedLayoutProps {
   children: React.ReactNode;
-  currentSection: "dashboard" | "create-post";
-  onNavigateToSection: (section: "dashboard" | "create-post") => void;
+  currentSection: "dashboard" | "create-post" | "connected-accounts";
+  onNavigateToSection: (section: "dashboard" | "create-post" | "connected-accounts") => void;
   onLogout: () => void;
 }
 
@@ -49,6 +49,17 @@ export const UnifiedLayout: React.FC<UnifiedLayoutProps> = ({
                   >
                     <span className="nav-icon">➕</span>
                     <span className="nav-label">Create Post</span>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    className={`nav-item ${
+                      currentSection === "connected-accounts" ? "active" : ""
+                    }`}
+                    onClick={() => onNavigateToSection("connected-accounts")}
+                  >
+                    <span className="nav-icon">🔗</span>
+                    <span className="nav-label">Connected Accounts</span>
                   </button>
                 </li>
               </ul>

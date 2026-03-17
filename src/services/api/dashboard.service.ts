@@ -9,16 +9,44 @@ import type {
   ScheduledPost,
 } from "@/types/dashboard.types";
 
+// Backend response types
+interface DashboardStatsResponse {
+  totalFollowers: number;
+  postsThisMonth: number;
+  engagementRate: number;
+  accounts: ConnectedAccount[];
+  upcomingPosts: ScheduledPost[];
+}
+
+interface UpcomingPostsResponse {
+  posts: ScheduledPost[];
+  pagination: {
+    total: number;
+    limit: number;
+    offset: number;
+    hasMore: boolean;
+  };
+}
+
 export const dashboardService = {
   /**
    * Get dashboard stats and data
    */
   async getDashboardStats(): Promise<DashboardStats> {
-    const response = await apiClient.get<DashboardStats>("/dashboard/stats");
+    const response = await apiClient.get<DashboardStatsResponse>(
+      "/dashboard/stats",
+    );
     if (!response.data) {
       throw new Error("Invalid response from server");
     }
-    return response.data;
+    // Return the entire response as DashboardStats
+    return {
+      totalFollowers: response.data.totalFollowers,
+      postsThisMonth: response.data.postsThisMonth,
+      engagementRate: response.data.engagementRate,
+      accounts: response.data.accounts,
+      upcomingPosts: response.data.upcomingPosts,
+    };
   },
 
   /**
@@ -59,16 +87,17 @@ export const dashboardService = {
   },
 
   /**
-   * Get upcoming posts
+   * Get upcoming posts - handles paginated response
    */
   async getUpcomingPosts(): Promise<ScheduledPost[]> {
-    const response = await apiClient.get<ScheduledPost[]>(
+    const response = await apiClient.get<UpcomingPostsResponse>(
       "/dashboard/posts/upcoming",
     );
-    if (!response.data) {
+    if (!response.data || !response.data.posts) {
       throw new Error("Invalid response from server");
     }
-    return response.data;
+    // Return just the posts array
+    return response.data.posts;
   },
 
   /**

@@ -9,97 +9,9 @@ import axios, {
 } from "axios";
 import type { ApiError, ApiRequestConfig, ApiResponse } from "@/types";
 import ENV from "@/config/environment";
+import { authManager } from "./auth-manager";
 
-// Mock data for development
-const mockPosts = [
-  {
-    id: "post-1",
-    accountId: "fb-1",
-    platform: "facebook" as const,
-    content:
-      "Check out our latest product launch! 🚀 Available now on all platforms.",
-    scheduledTime: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-    status: "published" as const,
-    engagement: {
-      likes: 2840,
-      comments: 156,
-      shares: 89,
-    },
-  },
-  {
-    id: "post-2",
-    accountId: "ig-1",
-    platform: "instagram" as const,
-    content:
-      "Beautiful sunset with our community. Thanks for the amazing support!",
-    scheduledTime: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-    status: "published" as const,
-    engagement: {
-      likes: 5320,
-      comments: 234,
-      shares: 145,
-    },
-  },
-  {
-    id: "post-3",
-    accountId: "tt-1",
-    platform: "tiktok" as const,
-    content:
-      "POV: You just discovered the best trending sound 🎵 #viral #trending",
-    scheduledTime: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-    status: "published" as const,
-    engagement: {
-      likes: 12540,
-      comments: 876,
-      shares: 2340,
-    },
-  },
-  {
-    id: "post-4",
-    accountId: "fb-1",
-    platform: "facebook" as const,
-    content: "Join us for our weekly live Q&A session! Thursday at 3 PM EST",
-    scheduledTime: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-    status: "published" as const,
-    engagement: {
-      likes: 1240,
-      comments: 89,
-      shares: 34,
-    },
-  },
-];
-
-const mockAccounts = [
-  {
-    id: "fb-1",
-    platform: "facebook" as const,
-    username: "mybrand",
-    followers: 5200,
-    isConnected: true,
-  },
-  {
-    id: "ig-1",
-    platform: "instagram" as const,
-    username: "mybrand.official",
-    followers: 12400,
-    isConnected: true,
-  },
-  {
-    id: "tt-1",
-    platform: "tiktok" as const,
-    username: "@mybrand",
-    followers: 45600,
-    isConnected: true,
-  },
-];
-
-const mockStats = {
-  totalFollowers: 63200,
-  postsThisMonth: 24,
-  engagementRate: 8.5,
-  accounts: mockAccounts,
-  upcomingPosts: mockPosts,
-};
+// Note: Mock data removed. Backend will return hardcoded data if it doesn't exist in database.
 
 export class ApiClient {
   private axiosInstance: AxiosInstance;
@@ -116,35 +28,65 @@ export class ApiClient {
       },
     });
 
+    // Request interceptor to add auth token
+    this.axiosInstance.interceptors.request.use(
+      (config) => {
+        // Try both possible token keys for compatibility
+        const token =
+          localStorage.getItem("auth_token") ||
+          localStorage.getItem("authToken");
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+      },
+      (error) => {
+        return Promise.reject(error);
+      },
+    );
+
     // Response interceptor for error handling and mock data
     this.axiosInstance.interceptors.response.use(
       (response: AxiosResponse) => response,
       (error: unknown) => {
         if (axios.isAxiosError(error)) {
-          // For mock/development, intercept specific endpoints and return mock data
-          if (error.config?.url?.includes("/dashboard/stats")) {
-            return Promise.resolve({
-              data: mockStats,
-            } as AxiosResponse);
-          }
-          if (error.config?.url?.includes("/dashboard/accounts")) {
-            return Promise.resolve({
-              data: mockAccounts,
-            } as AxiosResponse);
-          }
-          if (error.config?.url?.includes("/dashboard/posts/upcoming")) {
-            return Promise.resolve({
-              data: mockPosts,
-            } as AxiosResponse);
-          }
-
           if (error.response) {
+            console.log("Response error:", error.response);
+            // CHECK TOKEN EXPIRATION FIRST - before returning mock data
+            const responseData = error.response.data as Record<string, unknown>;
+            const message = (responseData?.message as string) || "";
+
+            if (
+              error.response.status === 401 ||
+              message.toLowerCase().includes("invalid") ||
+              message.toLowerCase().includes("expired") ||
+              message.toLowerCase().includes("token")
+            ) {
+              console.log("Token expiration detected! Triggering logout...");
+              // Clear auth token - this will trigger storage event listener
+              localStorage.removeItem("auth_token");
+              localStorage.removeItem("authToken");
+              localStorage.removeItem("auth_user");
+              localStorage.removeItem("auth_refresh_token");
+
+              // Trigger logout via auth manager (more reliable than storage event)
+              console.log("Calling authManager.triggerLogout()");
+              authManager.triggerLogout();
+
+              // Also dispatch event as fallback
+              window.dispatchEvent(new CustomEvent("auth-token-expired"));
+
+              throw {
+                code: "TOKEN_EXPIRED",
+                message: "Session expired. Please log in again.",
+                status: 401,
+              } as ApiError;
+            }
+
             // Server responded with error status
             throw {
               code: "API_ERROR",
-              message:
-                (error.response.data as Record<string, unknown>)?.message ||
-                "An error occurred",
+              message: responseData?.message || "An error occurred",
               status: error.response.status,
             } as ApiError;
           } else if (error.request) {
@@ -172,14 +114,21 @@ export class ApiClient {
     endpoint: string,
     options?: AxiosRequestConfig & ApiRequestConfig,
   ): Promise<ApiResponse<T>> {
-    const response = await this.axiosInstance.request<ApiResponse<T>>({
+    const response = await this.axiosInstance.request<T>({
       url: endpoint,
       ...options,
       params: options?.params,
       headers: options?.headers,
     });
 
-    return response.data;
+    // Backend returns data directly, not wrapped in ApiResponse
+    // So we wrap it here to match the expected return type
+    const data = response.data as T;
+    return {
+      status: response.status,
+      message: "Success",
+      data,
+    } as ApiResponse<T>;
   }
 
   async get<T>(

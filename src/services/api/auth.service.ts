@@ -2,11 +2,11 @@
  * Authentication Service - API calls for authentication
  */
 
+import { apiClient } from "./client";
 import type {
   LoginCredentials,
   SignUpCredentials,
   AuthResponse,
-  AuthUser,
 } from "@/types/auth.types";
 
 export const authService = {
@@ -14,35 +14,48 @@ export const authService = {
    * Login with email and password
    */
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    // Default credentials for demo
-    if (
-      credentials.email === "admin@demo.com" &&
-      credentials.password === "admin"
-    ) {
-      const user: AuthUser = {
-        id: "1",
-        email: "admin@demo.com",
-        name: "Admin User",
-      };
-      return {
-        token: "demo_token_" + Date.now(),
-        user,
-        refreshToken: "demo_refresh_token_" + Date.now(),
-      };
-    }
+    try {
+      const response = await apiClient.post<AuthResponse>("/auth/login", {
+        email: credentials.email,
+        password: credentials.password,
+      });
 
-    throw new Error(
-      "Invalid email or password. Use admin@demo.com / admin to login.",
-    );
+      if (!response?.data) {
+        throw new Error("Invalid response from server");
+      }
+
+      return response.data;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(error.message || "Login failed");
+      }
+      throw new Error("Login failed");
+    }
   },
 
   /**
    * Sign up with email, password, and name
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async signup(_credentials: SignUpCredentials): Promise<AuthResponse> {
-    // TODO: Implement signup when backend is ready
-    throw new Error("Sign up not yet implemented");
+  async signup(credentials: SignUpCredentials): Promise<AuthResponse> {
+    try {
+      const response = await apiClient.post<AuthResponse>("/auth/register", {
+        email: credentials.email,
+        password: credentials.password,
+        confirmPassword: credentials.passwordConfirm || credentials.password,
+        name: credentials.name,
+      });
+
+      if (!response?.data) {
+        throw new Error("Invalid response from server");
+      }
+
+      return response.data;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(error.message || "Sign up failed");
+      }
+      throw new Error("Sign up failed");
+    }
   },
 
   /**
@@ -56,25 +69,52 @@ export const authService = {
   /**
    * Refresh authentication token
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async refreshToken(_refreshToken: string): Promise<AuthResponse> {
-    // TODO: Implement token refresh when backend is ready
-    throw new Error("Token refresh not yet implemented");
+  async refreshToken(refreshToken: string): Promise<AuthResponse> {
+    try {
+      const response = await apiClient.post<AuthResponse>("/auth/refresh", {
+        refreshToken,
+      });
+
+      if (!response?.data) {
+        throw new Error("Invalid response from server");
+      }
+
+      return response.data;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new Error(error.message || "Token refresh failed");
+      }
+      throw new Error("Token refresh failed");
+    }
   },
 
   /**
    * Logout - clear server session
    */
   async logout(): Promise<void> {
-    // TODO: Call logout endpoint on backend if needed
+    try {
+      await apiClient.post("/auth/logout", {});
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Don't throw on logout to allow local cleanup even if server request fails
+    }
   },
 
   /**
    * Verify current token
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async verifyToken(_token: string): Promise<boolean> {
-    // TODO: Implement token verification when backend is ready
-    return true;
+  async verifyToken(token: string): Promise<boolean> {
+    try {
+      const response = await apiClient.get<{ valid: boolean }>("/auth/verify", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      return response.data?.valid || false;
+    } catch (error) {
+      console.error("Token verification error:", error);
+      return false;
+    }
   },
 };
