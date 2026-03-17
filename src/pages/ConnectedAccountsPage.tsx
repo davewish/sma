@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks";
 import { ConnectedAccountsComponent } from "@/components/features/ConnectedAccounts";
 import { socialService } from "@/services/api/social.service";
-import ENV from "@/config/environment";
 import type { ConnectedAccount } from "@/types/dashboard.types";
 import type { OAuthProvider } from "@/types/oauth.types";
 import "@/styles/connected-accounts.css";
@@ -91,10 +90,21 @@ export function ConnectedAccountsPage(): React.ReactElement {
   const handleConnect = async (platform: OAuthProvider) => {
     try {
       console.log(`Initiating OAuth flow for ${platform}...`);
-      // Get the current origin for the callback redirect
+      // Make an authenticated API call to start OAuth flow
+      // The backend will handle the redirect to the OAuth provider
       const callbackUrl = `${window.location.origin}/dashboard/connected-accounts`;
-      // Redirect to backend OAuth endpoint with callback URL
-      window.location.href = `${ENV.API_BASE_URL}/social/connect/${platform}?callback=${encodeURIComponent(callbackUrl)}`;
+      
+      // Call the connect endpoint through the API client (which includes auth headers)
+      // The backend should respond with a redirect
+      const response = await socialService.initiateOAuthConnection(platform, callbackUrl);
+      
+      // The backend returns a redirect URL
+      if (response?.redirectUrl) {
+        window.location.href = response.redirectUrl;
+      } else {
+        console.warn("No redirect URL returned from backend");
+        setError("Failed to initiate connection");
+      }
     } catch (error) {
       console.error(`Failed to connect ${platform}:`, error);
       setError(`Failed to initiate ${platform} connection`);

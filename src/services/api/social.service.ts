@@ -55,6 +55,23 @@ export const socialService = {
   },
 
   /**
+   * Initiate OAuth connection - returns redirect URL
+   */
+  async initiateOAuthConnection(
+    platform: string,
+    callbackUrl: string,
+  ): Promise<{ redirectUrl: string }> {
+    const response = await apiClient.post<{ redirectUrl: string }>(
+      `/social/connect/${platform}`,
+      { callback: callbackUrl },
+    );
+    if (!response?.data?.redirectUrl) {
+      throw new Error("Invalid response from server");
+    }
+    return response.data;
+  },
+
+  /**
    * Connect a new social media account via OAuth
    */
   async connectAccount(
