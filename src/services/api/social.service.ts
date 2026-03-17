@@ -3,6 +3,7 @@
  */
 
 import { apiClient } from "./client";
+import ENV from "@/config/environment";
 
 export interface SocialAccount {
   _id?: string;
@@ -55,15 +56,21 @@ export const socialService = {
   },
 
   /**
+   * Get OAuth URL for initiating connection
+   */
+  getOAuthUrl(platform: string, callbackUrl: string): string {
+    return `${ENV.API_BASE_URL}/social/connect/${platform}?callback=${encodeURIComponent(callbackUrl)}`;
+  },
+
+  /**
    * Initiate OAuth connection - returns redirect URL
    */
   async initiateOAuthConnection(
     platform: string,
     callbackUrl: string,
   ): Promise<{ redirectUrl: string }> {
-    const response = await apiClient.post<{ redirectUrl: string }>(
-      `/social/connect/${platform}`,
-      { callback: callbackUrl },
+    const response = await apiClient.get<{ redirectUrl: string }>(
+      `/social/connect/${platform}?callback=${encodeURIComponent(callbackUrl)}`,
     );
     if (!response?.data?.redirectUrl) {
       throw new Error("Invalid response from server");
