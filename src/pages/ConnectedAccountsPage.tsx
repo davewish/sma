@@ -63,17 +63,40 @@ export function ConnectedAccountsPage(): React.ReactElement {
 
   useEffect(() => {
     loadAccounts();
+
+    // Check for OAuth callback - if user is returning from OAuth
+    const params = new URLSearchParams(window.location.search);
+    const successParam = params.get("success");
+    const errorParam = params.get("error");
+
+    if (successParam === "true") {
+      console.log("OAuth callback detected - reloading accounts");
+      setError(null);
+      // Clear the URL params
+      window.history.replaceState({}, document.title, window.location.pathname);
+      // Reload accounts after a short delay to ensure backend has saved
+      setTimeout(() => {
+        loadAccounts();
+      }, 500);
+    } else if (errorParam) {
+      console.error("OAuth error:", errorParam);
+      setError(`Failed to connect account: ${errorParam}`);
+      // Clear the URL params
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleConnect = async (platform: OAuthProvider) => {
     try {
-      // In production, the OAuth callback would add the account
-      // For now, we just show a message
-      console.log(`OAuth flow initiated for ${platform}`);
-      // The actual account addition would happen after OAuth callback
+      console.log(`Initiating OAuth flow for ${platform}...`);
+      // Get the current origin for the callback redirect
+      const callbackUrl = `${window.location.origin}/dashboard/connected-accounts`;
+      // Redirect to backend OAuth endpoint with callback URL
+      window.location.href = `${import.meta.env.VITE_API_BASE_URL}/social/connect/${platform}?callback=${encodeURIComponent(callbackUrl)}`;
     } catch (error) {
       console.error(`Failed to connect ${platform}:`, error);
+      setError(`Failed to initiate ${platform} connection`);
     }
   };
 
