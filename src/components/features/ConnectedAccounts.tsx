@@ -12,6 +12,7 @@ interface ConnectedAccountsProps {
   accounts: ConnectedAccount[];
   onConnect: (platform: OAuthProvider) => Promise<void>;
   onDisconnect: (accountId: string) => void;
+  disconnectingId?: string | null;
 }
 
 const platformEmojis: Record<string, string> = {
@@ -30,6 +31,7 @@ export function ConnectedAccountsComponent({
   accounts,
   onConnect,
   onDisconnect,
+  disconnectingId,
 }: ConnectedAccountsProps) {
   const { initiateConnection, isLoading } = useOAuth();
   const [loadingPlatform, setLoadingPlatform] = useState<string | null>(null);
@@ -90,9 +92,11 @@ export function ConnectedAccountsComponent({
               <button
                 className="disconnect-btn"
                 onClick={() => onDisconnect(account.id)}
-                disabled={isLoading}
+                disabled={isLoading || disconnectingId === account.id}
               >
-                Disconnect
+                {disconnectingId === account.id
+                  ? "Disconnecting..."
+                  : "Disconnect"}
               </button>
             </div>
           ))}

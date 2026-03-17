@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { AuthProvider } from "@/context";
 import { useAuth } from "@/hooks";
-import { LandingPage, LoginPage, DashboardPage, CreatePostPage, ConnectedAccountsPage } from "@/pages";
+import {
+  LandingPage,
+  LoginPage,
+  DashboardPage,
+  CreatePostPage,
+  ConnectedAccountsPage,
+} from "@/pages";
 import { UnifiedLayout } from "@/components/layout";
 import "@/styles/global.css";
 

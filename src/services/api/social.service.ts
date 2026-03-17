@@ -74,8 +74,8 @@ export const socialService = {
   /**
    * Disconnect a social media account
    */
-  async disconnectAccount(accountId: string): Promise<void> {
-    await apiClient.delete(`/social/accounts/${accountId}`);
+  async disconnectAccount(platform: string): Promise<void> {
+    await apiClient.delete(`/social/disconnect/${platform}`);
   },
 
   /**

@@ -11,6 +11,7 @@ export function ConnectedAccountsPage(): React.ReactElement {
   const [accounts, setAccounts] = useState<ConnectedAccount[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [disconnectingId, setDisconnectingId] = useState<string | null>(null);
 
   // Helper to check if error is token expiration
   const isTokenExpired = (err: unknown): boolean => {
@@ -47,7 +48,9 @@ export function ConnectedAccountsPage(): React.ReactElement {
 
       // Check if it's a token expiration error
       if (isTokenExpired(err)) {
-        console.log("Token expired detected in ConnectedAccountsPage, logging out");
+        console.log(
+          "Token expired detected in ConnectedAccountsPage, logging out",
+        );
         await logout();
         return;
       }
@@ -76,9 +79,22 @@ export function ConnectedAccountsPage(): React.ReactElement {
 
   const handleDisconnect = async (accountId: string) => {
     try {
-      await socialService.disconnectAccount(accountId);
+      setDisconnectingId(accountId);
+      // Find the account to get its platform
+      const account = accounts.find((acc) => acc.id === accountId);
+      if (!account) {
+        setError("Account not found");
+        setDisconnectingId(null);
+        return;
+      }
+
+      console.log(`Disconnecting ${account.platform}...`);
+      await socialService.disconnectAccount(account.platform);
+      console.log(`Successfully disconnected ${account.platform}`);
       setAccounts(accounts.filter((acc) => acc.id !== accountId));
+      setDisconnectingId(null);
     } catch (err) {
+      setDisconnectingId(null);
       // Check if it's a token expiration error
       if (isTokenExpired(err)) {
         console.log("Token expired detected in handleDisconnect, logging out");
@@ -88,6 +104,7 @@ export function ConnectedAccountsPage(): React.ReactElement {
 
       const errorMessage =
         err instanceof Error ? err.message : "Failed to disconnect account";
+      console.error("Disconnect error:", errorMessage);
       setError(errorMessage);
     }
   };
@@ -116,6 +133,7 @@ export function ConnectedAccountsPage(): React.ReactElement {
         accounts={accounts}
         onConnect={handleConnect}
         onDisconnect={handleDisconnect}
+        disconnectingId={disconnectingId}
       />
     </div>
   );

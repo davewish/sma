@@ -8,7 +8,9 @@ import "@/styles/unified-layout.css";
 interface UnifiedLayoutProps {
   children: React.ReactNode;
   currentSection: "dashboard" | "create-post" | "connected-accounts";
-  onNavigateToSection: (section: "dashboard" | "create-post" | "connected-accounts") => void;
+  onNavigateToSection: (
+    section: "dashboard" | "create-post" | "connected-accounts",
+  ) => void;
   onLogout: () => void;
 }
 

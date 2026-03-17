@@ -33,9 +33,8 @@ export const dashboardService = {
    * Get dashboard stats and data
    */
   async getDashboardStats(): Promise<DashboardStats> {
-    const response = await apiClient.get<DashboardStatsResponse>(
-      "/dashboard/stats",
-    );
+    const response =
+      await apiClient.get<DashboardStatsResponse>("/dashboard/stats");
     if (!response.data) {
       throw new Error("Invalid response from server");
     }

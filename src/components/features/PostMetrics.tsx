@@ -37,9 +37,7 @@ export function PostMetrics({ posts }: PostMetricsProps): React.ReactElement {
         </div>
         <div className="no-metrics-message">
           <p>No posts yet</p>
-          <p className="small-text">
-            Posts will display metrics here
-          </p>
+          <p className="small-text">Posts will display metrics here</p>
         </div>
       </div>
     );
