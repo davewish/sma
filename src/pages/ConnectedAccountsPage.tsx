@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks";
 import { ConnectedAccountsComponent } from "@/components/features/ConnectedAccounts";
 import { socialService } from "@/services/api/social.service";
+import ENV from "@/config/environment";
 import type { ConnectedAccount } from "@/types/dashboard.types";
 import type { OAuthProvider } from "@/types/oauth.types";
 import "@/styles/connected-accounts.css";
@@ -93,7 +94,7 @@ export function ConnectedAccountsPage(): React.ReactElement {
       // Get the current origin for the callback redirect
       const callbackUrl = `${window.location.origin}/dashboard/connected-accounts`;
       // Redirect to backend OAuth endpoint with callback URL
-      window.location.href = `${import.meta.env.VITE_API_BASE_URL}/social/connect/${platform}?callback=${encodeURIComponent(callbackUrl)}`;
+      window.location.href = `${ENV.API_BASE_URL}/social/connect/${platform}?callback=${encodeURIComponent(callbackUrl)}`;
     } catch (error) {
       console.error(`Failed to connect ${platform}:`, error);
       setError(`Failed to initiate ${platform} connection`);
