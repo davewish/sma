@@ -58,38 +58,20 @@ export const socialService = {
   /**
    * Get OAuth URL for initiating connection
    */
-  getOAuthUrl(platform: string, callbackUrl: string): string {
-    return `${ENV.API_BASE_URL}/social/connect/${platform}?callback=${encodeURIComponent(callbackUrl)}`;
+  getOAuthUrl(platform: string): string {
+    return `${ENV.API_BASE_URL}/social/connect/${platform}`;
   },
 
   /**
-   * Initiate OAuth connection - returns redirect URL
+   * Initiate OAuth connection
    */
   async initiateOAuthConnection(
     platform: string,
-    callbackUrl: string,
   ): Promise<{ redirectUrl: string }> {
     const response = await apiClient.get<{ redirectUrl: string }>(
-      `/social/connect/${platform}?callback=${encodeURIComponent(callbackUrl)}`,
+      `/social/connect/${platform}`,
     );
     if (!response?.data?.redirectUrl) {
-      throw new Error("Invalid response from server");
-    }
-    return response.data;
-  },
-
-  /**
-   * Connect a new social media account via OAuth
-   */
-  async connectAccount(
-    platform: string,
-    authCode: string,
-  ): Promise<SocialAccount> {
-    const response = await apiClient.post<SocialAccount>(
-      `/social/accounts/connect`,
-      { platform, code: authCode },
-    );
-    if (!response?.data) {
       throw new Error("Invalid response from server");
     }
     return response.data;

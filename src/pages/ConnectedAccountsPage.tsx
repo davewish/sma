@@ -90,12 +90,9 @@ export function ConnectedAccountsPage(): React.ReactElement {
   const handleConnect = async (platform: OAuthProvider) => {
     try {
       console.log(`Initiating OAuth flow for ${platform}...`);
-      // Get the current origin for the callback redirect
-      const callbackUrl = `${window.location.origin}/dashboard/connected-accounts`;
-      
       // Call the OAuth endpoint through API client (automatically includes auth headers)
       // The backend will redirect to Facebook OAuth
-      await socialService.initiateOAuthConnection(platform, callbackUrl);
+      await socialService.initiateOAuthConnection(platform);
     } catch (error) {
       console.error(`Failed to connect ${platform}:`, error);
       setError(`Failed to initiate ${platform} connection`);
